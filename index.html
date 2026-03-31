@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proyecto Gastronómico Andino — Sumate al equipo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --tierra: #8B5E3C;
+    --arena: #D4B896;
+    --crema: #F5EDE0;
+    --carbon: #1C1814;
+    --piedra: #6B6560;
+    --dorado: #C49A3C;
+    --blanco: #FDFAF6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--blanco);
+    color: var(--carbon);
+    overflow-x: hidden;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    background: var(--carbon);
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .hero-texture {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 70% 50%, rgba(139,94,60,0.35) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M0 60L60 0M-10 10L10-10M50 70L70 50' stroke='%238B5E3C' stroke-width='0.4' opacity='0.15'/%3E%3C/svg%3E");
+    background-size: cover, 60px 60px;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(196,154,60,0.15);
+    border: 1px solid rgba(196,154,60,0.4);
+    color: var(--dorado);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    border-radius: 2px;
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(48px, 6vw, 80px);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--crema);
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.4s forwards;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--arena);
+  }
+
+  .hero-sub {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--piedra);
+    line-height: 1.7;
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.6s forwards;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--tierra);
+    color: var(--crema);
+    text-decoration: none;
+    padding: 16px 32px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.8s forwards;
+  }
+
+  .hero-cta:hover {
+    background: var(--dorado);
+    color: var(--carbon);
+    transform: translateY(-2px);
+  }
+
+  .hero-cta svg { transition: transform 0.3s ease; }
+  .hero-cta:hover svg { transform: translateX(4px); }
+
+  .hero-visual {
+    opacity: 0;
+    animation: fadeIn 1.2s ease 0.6s forwards;
+  }
+
+  .hero-card {
+    background: rgba(245,237,224,0.06);
+    border: 1px solid rgba(212,184,150,0.2);
+    border-radius: 4px;
+    padding: 40px;
+    backdrop-filter: blur(10px);
+  }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .stat {
+    padding: 24px;
+    background: rgba(139,94,60,0.12);
+    border-radius: 3px;
+    border-left: 2px solid var(--tierra);
+  }
+
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 48px;
+    font-weight: 300;
+    color: var(--arena);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--piedra);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+
+  /* ─── POR QUÉ ─── */
+  .porque {
+    background: var(--crema);
+    padding: 120px 48px;
+    position: relative;
+  }
+
+  .porque::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--arena), transparent);
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--tierra);
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4vw, 56px);
+    font-weight: 300;
+    line-height: 1.15;
+    color: var(--carbon);
+    margin-bottom: 64px;
+    max-width: 600px;
+  }
+
+  .section-title em {
+    font-style: italic;
+    color: var(--tierra);
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; }
+
+  .beneficios {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: rgba(107,101,96,0.15);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .beneficio {
+    background: var(--blanco);
+    padding: 48px 36px;
+    transition: background 0.3s ease;
+  }
+
+  .beneficio:hover { background: var(--carbon); }
+  .beneficio:hover .ben-title { color: var(--arena); }
+  .beneficio:hover .ben-text { color: var(--piedra); }
+  .beneficio:hover .ben-icon { background: rgba(139,94,60,0.3); color: var(--dorado); }
+
+  .ben-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(139,94,60,0.1);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 24px;
+    transition: all 0.3s ease;
+  }
+
+  .ben-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    color: var(--carbon);
+    margin-bottom: 12px;
+    transition: color 0.3s ease;
+  }
+
+  .ben-text {
+    font-size: 14px;
+    color: var(--piedra);
+    line-height: 1.7;
+    font-weight: 300;
+    transition: color 0.3s ease;
+  }
+
+  /* ─── PUESTOS ─── */
+  .puestos {
+    background: var(--blanco);
+    padding: 120px 48px;
+  }
+
+  .puestos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .puesto {
+    border: 1px solid rgba(107,101,96,0.2);
+    border-radius: 4px;
+    padding: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .puesto:hover {
+    border-color: var(--tierra);
+    background: var(--crema);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(139,94,60,0.12);
+  }
+
+  .puesto-info { flex: 1; }
+
+  .puesto-area {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--tierra);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .puesto-nombre {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--carbon);
+    margin-bottom: 8px;
+  }
+
+  .puesto-zona {
+    font-size: 13px;
+    color: var(--piedra);
+    font-weight: 300;
+  }
+
+  .puesto-arrow {
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(107,101,96,0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--tierra);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .puesto:hover .puesto-arrow {
+    background: var(--tierra);
+    color: var(--crema);
+    border-color: var(--tierra);
+  }
+
+  /* ─── CHAT ─── */
+  .chat-section {
+    background: var(--carbon);
+    padding: 120px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .chat-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 30% 50%, rgba(139,94,60,0.2) 0%, transparent 60%);
+  }
+
+  .chat-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 80px;
+    align-items: start;
+    position: relative;
+    z-index: 2;
+  }
+
+  .chat-intro .section-label { color: var(--dorado); }
+
+  .chat-intro .section-title {
+    color: var(--crema);
+    margin-bottom: 24px;
+  }
+
+  .chat-intro p {
+    font-size: 15px;
+    color: var(--piedra);
+    line-height: 1.8;
+    font-weight: 300;
+    margin-bottom: 32px;
+  }
+
+  .chat-features {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .chat-feature {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 14px;
+    color: var(--arena);
+    font-weight: 300;
+  }
+
+  .chat-feature::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--tierra);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Chat UI */
+  .chat-widget {
+    background: rgba(245,237,224,0.04);
+    border: 1px solid rgba(212,184,150,0.15);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .chat-header {
+    background: rgba(139,94,60,0.2);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(212,184,150,0.1);
+  }
+
+  .chat-avatar {
+    width: 36px;
+    height: 36px;
+    background: var(--tierra);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .chat-header-info h4 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--crema);
+    margin-bottom: 2px;
+  }
+
+  .chat-status {
+    font-size: 11px;
+    color: #4ade80;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .chat-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #4ade80;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .chat-messages {
+    padding: 20px;
+    min-height: 320px;
+    max-height: 320px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139,94,60,0.3) transparent;
+  }
+
+  .msg {
+    max-width: 80%;
+    animation: fadeUp 0.3s ease forwards;
+  }
+
+  .msg-bot {
+    align-self: flex-start;
+  }
+
+  .msg-user {
+    align-self: flex-end;
+  }
+
+  .msg-bubble {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .msg-bot .msg-bubble {
+    background: rgba(212,184,150,0.12);
+    color: var(--crema);
+    border-bottom-left-radius: 4px;
+  }
+
+  .msg-user .msg-bubble {
+    background: var(--tierra);
+    color: var(--crema);
+    border-bottom-right-radius: 4px;
+  }
+
+  .typing {
+    align-self: flex-start;
+    padding: 12px 16px;
+    background: rgba(212,184,150,0.12);
+    border-radius: 12px;
+    border-bottom-left-radius: 4px;
+    display: none;
+  }
+
+  .typing span {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--arena);
+    border-radius: 50%;
+    margin: 0 2px;
+    animation: bounce 1.2s infinite;
+  }
+
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  .chat-input-area {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(212,184,150,0.1);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .chat-input {
+    flex: 1;
+    background: rgba(245,237,224,0.06);
+    border: 1px solid rgba(212,184,150,0.2);
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: var(--crema);
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .chat-input::placeholder { color: rgba(212,184,150,0.4); }
+  .chat-input:focus { border-color: var(--tierra); }
+
+  .chat-send {
+    width: 40px;
+    height: 40px;
+    background: var(--tierra);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .chat-send:hover { background: var(--dorado); }
+  .chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--carbon);
+    border-top: 1px solid rgba(212,184,150,0.1);
+    padding: 32px 48px;
+    text-align: center;
+  }
+
+  footer p {
+    font-size: 12px;
+    color: var(--piedra);
+    letter-spacing: 1px;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    .hero-content, .chat-layout { grid-template-columns: 1fr; gap: 40px; }
+    .beneficios { grid-template-columns: 1fr; }
+    .puestos-grid { grid-template-columns: 1fr; }
+    .hero-visual { display: none; }
+    .hero-content, .porque, .puestos, .chat-section { padding-left: 24px; padding-right: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-texture"></div>
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="hero-badge">Buenos Aires · Gastronomía</div>
+      <h1>Construí tu<br>carrera <em>en la</em><br>mesa grande.</h1>
+      <p class="hero-sub">Somos un grupo gastronómico en crecimiento. Buscamos personas con vocación, ganas de aprender y disposición para crecer — desde el primer día hasta donde quieran llegar.</p>
+      <a href="#postulate" class="hero-cta">
+        Quiero sumarme
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="hero-stats">
+          <div class="stat">
+            <div class="stat-num">4</div>
+            <div class="stat-label">Marcas activas</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">+200</div>
+            <div class="stat-label">Colaboradores</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">10+</div>
+            <div class="stat-label">Años en el sector</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num">∞</div>
+            <div class="stat-label">Posibilidades</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POR QUÉ -->
+<section class="porque" id="porque">
+  <div class="container">
+    <div class="section-label">Por qué elegirnos</div>
+    <h2 class="section-title">Un lugar donde <em>importa</em><br>lo que hacés.</h2>
+    <div class="beneficios">
+      <div class="beneficio">
+        <div class="ben-icon">🌱</div>
+        <div class="ben-title">Crecimiento real</div>
+        <p class="ben-text">Muchos de nuestros encargados empezaron como bacheros. Creemos en el desarrollo interno antes que en la búsqueda externa.</p>
+      </div>
+      <div class="beneficio">
+        <div class="ben-icon">🤝</div>
+        <div class="ben-title">Equipo de verdad</div>
+        <p class="ben-text">No somos un número. Conocemos a cada persona, sus horarios, sus necesidades y sus objetivos.</p>
+      </div>
+      <div class="beneficio">
+        <div class="ben-icon">📍</div>
+        <div class="ben-title">Varias ubicaciones</div>
+        <p class="ben-text">Operamos en distintos puntos de Buenos Aires. Buscamos el lugar que mejor se adapte a tu zona y disponibilidad.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PUESTOS -->
+<section class="puestos" id="puestos">
+  <div class="container">
+    <div class="section-label">Oportunidades disponibles</div>
+    <h2 class="section-title">Encontrá tu <em>lugar</em><br>en el equipo.</h2>
+    <div class="puestos-grid">
+      <a href="#postulate" class="puesto">
+        <div class="puesto-info">
+          <div class="puesto-area">Salón</div>
+          <div class="puesto-nombre">Mozo / Moza</div>
+          <div class="puesto-zona">Buenos Aires · Tiempo completo o parcial</div>
+        </div>
+        <div class="puesto-arrow">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
+      <a href="#postulate" class="puesto">
+        <div class="puesto-info">
+          <div class="puesto-area">Cocina</div>
+          <div class="puesto-nombre">Cocinero / Ayudante</div>
+          <div class="puesto-zona">Buenos Aires · Todas las ubicaciones</div>
+        </div>
+        <div class="puesto-arrow">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
+      <a href="#postulate" class="puesto">
+        <div class="puesto-info">
+          <div class="puesto-area">Operaciones</div>
+          <div class="puesto-nombre">Encargado de local</div>
+          <div class="puesto-zona">Buenos Aires · Posición de liderazgo</div>
+        </div>
+        <div class="puesto-arrow">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
+      <a href="#postulate" class="puesto">
+        <div class="puesto-info">
+          <div class="puesto-area">Limpieza & Soporte</div>
+          <div class="puesto-nombre">Bachero / Bachera</div>
+          <div class="puesto-zona">Buenos Aires · Entrada al sector</div>
+        </div>
+        <div class="puesto-arrow">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CHAT -->
+<section class="chat-section" id="postulate">
+  <div class="container">
+    <div class="chat-layout">
+      <div class="chat-intro">
+        <div class="section-label">Postulate ahora</div>
+        <h2 class="section-title">Contanos <em>quién</em><br>sos vos.</h2>
+        <p>Nuestro asistente virtual te va a hacer algunas preguntas para conocerte mejor. Es rápido, sin formularios, sin esperas.</p>
+        <div class="chat-features">
+          <div class="chat-feature">Sin CV requerido para empezar</div>
+          <div class="chat-feature">Respuesta en menos de 48hs hábiles</div>
+          <div class="chat-feature">Proceso claro y transparente</div>
+          <div class="chat-feature">Disponible todos los días</div>
+        </div>
+      </div>
+
+      <div class="chat-widget">
+        <div class="chat-header">
+          <div class="chat-avatar">🏔️</div>
+          <div class="chat-header-info">
+            <h4>Asistente PGA</h4>
+            <div class="chat-status">En línea ahora</div>
+          </div>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="msg msg-bot">
+            <div class="msg-bubble">¡Hola! Soy el asistente virtual de Proyecto Gastronómico Andino 🏔️<br><br>Voy a hacerte algunas preguntas para conocerte mejor. ¿Empezamos?</div>
+          </div>
+        </div>
+        <div class="typing" id="typing">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="chat-input-area">
+          <input type="text" class="chat-input" id="chatInput" placeholder="Escribí tu respuesta..." />
+          <button class="chat-send" id="chatSend" onclick="sendMessage()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M2 8l12-6-5 6 5 6-12-6z" fill="white"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Proyecto Gastronómico Andino · Buenos Aires, Argentina</p>
+</footer>
+
+<script>
+  const GEMINI_API_KEY = AIzaSyDwvoB8MlHj8LNoCXEoyGcAD45V8lpJi_c;
+
+  const SYSTEM_PROMPT = `Sos el asistente virtual de Proyecto Gastronómico Andino, un grupo gastronómico de Buenos Aires.
+Tu rol es hacer una preselección amable y profesional de candidatos para puestos gastronómicos (mozos, cocineros, encargados, bacheros, ayudantes de cocina, bartenders).
+
+Hacé las siguientes preguntas de forma conversacional, una por vez:
+1. Nombre completo
+2. Qué puesto le interesa
+3. Experiencia previa en gastronomía (años y roles)
+4. Disponibilidad horaria (turnos, días)
+5. Zona de residencia o cercanía en Buenos Aires
+6. Pretensión salarial aproximada
+7. Si tiene documentación en regla (DNI argentino o residencia)
+
+Al final, agradecé y decile que el equipo de RRHH se va a comunicar en las próximas 48hs hábiles.
+
+Sé cálido, breve y directo. No hagas más de una pregunta por mensaje. No menciones que sos una IA a menos que te lo pregunten directamente.`;
+
+  let conversationHistory = [];
+  let isWaiting = false;
+
+  async function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text || isWaiting) return;
+
+    addMessage(text, 'user');
+    input.value = '';
+    isWaiting = true;
+    document.getElementById('chatSend').disabled = true;
+
+    conversationHistory.push({ role: 'user', parts: [{ text }] });
+
+    showTyping(true);
+
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+            contents: conversationHistory
+          })
+        }
+      );
+
+      const data = await response.json();
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Hubo un problema, ¿podés repetir?';
+
+      conversationHistory.push({ role: 'model', parts: [{ text: reply }] });
+
+      showTyping(false);
+      addMessage(reply, 'bot');
+
+    } catch (e) {
+      showTyping(false);
+      addMessage('Hubo un error de conexión. Intentá de nuevo en un momento.', 'bot');
+    }
+
+    isWaiting = false;
+    document.getElementById('chatSend').disabled = false;
+    input.focus();
+  }
+
+  function addMessage(text, type) {
+    const messages = document.getElementById('chatMessages');
+    const msg = document.createElement('div');
+    msg.className = `msg msg-${type}`;
+    msg.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g, '<br>')}</div>`;
+    messages.appendChild(msg);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function showTyping(show) {
+    const typing = document.getElementById('typing');
+    typing.style.display = show ? 'block' : 'none';
+    if (show) {
+      const messages = document.getElementById('chatMessages');
+      messages.scrollTop = messages.scrollHeight;
+    }
+  }
+
+  document.getElementById('chatInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendMessage();
+  });
+
+  // Mensaje inicial automático después de 1s
+  setTimeout(() => {
+    addMessage('¿Cómo te llamás?', 'bot');
+    conversationHistory.push({ role: 'model', parts: [{ text: '¿Cómo te llamás?' }] });
+  }, 1000);
+</script>
+
+</body>
+</html>
