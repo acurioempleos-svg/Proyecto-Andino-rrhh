@@ -759,7 +759,7 @@
         </div>
         <div class="chat-input-area">
           <input type="text" class="chat-input" id="chatInput" placeholder="Escribí tu respuesta..." />
-          <button class="chat-send" id="chatSend" onclick="sendMessage()">
+          <button class="chat-send" id="chatSend" >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M2 8l12-6-5 6 5 6-12-6z" fill="white"/>
             </svg>
@@ -775,7 +775,7 @@
 </footer>
 
 <script>
-  const GEMINI_API_KEY = AIzaSyDwvoB8MlHj8LNoCXEoyGcAD45V8lpJi_c;
+  const GEMINI_API_KEY = 'AIzaSyDwvoB8MlHj8LNoCXEoyGcAD45V8lpJi_c';
 
   const SYSTEM_PROMPT = `Sos el asistente virtual de Proyecto Gastronómico Andino, un grupo gastronómico de Buenos Aires.
 Tu rol es hacer una preselección amable y profesional de candidatos para puestos gastronómicos (mozos, cocineros, encargados, bacheros, ayudantes de cocina, bartenders).
@@ -797,6 +797,7 @@ Sé cálido, breve y directo. No hagas más de una pregunta por mensaje. No menc
   let isWaiting = false;
 
   async function sendMessage() {
+    if (typeof isWaiting === 'undefined') return;
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
     if (!text || isWaiting) return;
@@ -859,15 +860,18 @@ Sé cálido, breve y directo. No hagas más de una pregunta por mensaje. No menc
     }
   }
 
-  document.getElementById('chatInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') sendMessage();
-  });
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('chatInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') sendMessage();
+    });
 
-  // Mensaje inicial automático después de 1s
-  setTimeout(() => {
-    addMessage('¿Cómo te llamás?', 'bot');
-    conversationHistory.push({ role: 'model', parts: [{ text: '¿Cómo te llamás?' }] });
-  }, 1000);
+    document.getElementById('chatSend').addEventListener('click', sendMessage);
+
+    setTimeout(() => {
+      addMessage('¿Cómo te llamás?', 'bot');
+      conversationHistory.push({ role: 'model', parts: [{ text: '¿Cómo te llamás?' }] });
+    }, 1000);
+  });
 </script>
 
 </body>
