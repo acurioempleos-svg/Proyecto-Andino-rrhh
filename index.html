@@ -796,7 +796,7 @@ Sé cálido, breve y directo. No hagas más de una pregunta por mensaje. No menc
   let conversationHistory = [];
   let isWaiting = false;
 
-  async function sendMessage() {
+ async function sendMessage() {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
     if (!text || isWaiting) return;
@@ -806,6 +806,7 @@ Sé cálido, breve y directo. No hagas más de una pregunta por mensaje. No menc
     isWaiting = true;
     document.getElementById('chatSend').disabled = true;
 
+    // Agregamos el mensaje del usuario
     conversationHistory.push({ role: 'user', parts: [{ text }] });
 
     showTyping(true);
@@ -820,23 +821,29 @@ Sé cálido, breve y directo. No hagas más de una pregunta por mensaje. No menc
         })
       });
 
-      const data = await response.json();
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Hubo un problema, ¿podés repetir?';
+      if (!response.ok) throw new Error('Error en el servidor proxy');
 
+      const data = await response.json();
+      
+      // Accedemos a la respuesta según el formato de Gemini
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text 
+                 || 'No recibí una respuesta clara. ¿Podrías intentar de nuevo?';
+
+      addMessage(reply, 'bot');
       conversationHistory.push({ role: 'model', parts: [{ text: reply }] });
 
-      showTyping(false);
-      addMessage(reply, 'bot');
-
     } catch (e) {
+      console.error(e);
+      addMessage('Lo siento, perdí la conexión con la montaña. Reintentá en un momento.', 'bot');
+      // Eliminamos el último mensaje del usuario del historial para no romper el orden si reintenta
+      conversationHistory.pop();
+    } finally {
       showTyping(false);
-      addMessage('Hubo un error de conexión. Intentá de nuevo en un momento.', 'bot');
+      isWaiting = false;
+      document.getElementById('chatSend').disabled = false;
+      input.focus();
     }
-
-    isWaiting = false;
-    document.getElementById('chatSend').disabled = false;
-    input.focus();
-  }
+}
 
   function addMessage(text, type) {
     const messages = document.getElementById('chatMessages');
