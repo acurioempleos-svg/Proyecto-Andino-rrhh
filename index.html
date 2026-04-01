@@ -778,14 +778,34 @@
   // 1. URL de tu servidor en Vercel
   const PROXY_URL = 'https://proyectoandino.vercel.app/api/chat';
 
-  // 2. Instrucciones para la IA
-  const SYSTEM_PROMPT = `Sos el asistente virtual de Proyecto Gastronómico Andino.
-  Tu rol es hacer una preselección amable de candidatos.
-  Hacé estas preguntas una por una: Nombre, Puesto, Experiencia, Disponibilidad, Zona, Pretensión salarial y Documentación.
-  Sé breve y profesional. No menciones que sos una IA.`;
+  // 2. URL del Google Apps Script para guardar en Sheet
+  const SHEET_URL = 'TU_APPS_SCRIPT_URL_ACÁ';
+
+  // 3. Instrucciones para la IA
+  const SYSTEM_PROMPT = `Sos el asistente virtual de Proyecto Gastronómico Andino, un grupo gastronómico de Buenos Aires.
+Tu rol es hacer una preselección amable pero rigurosa de candidatos para puestos gastronómicos.
+
+Hacé las siguientes preguntas de forma conversacional, una por vez, en este orden:
+1. Nombre completo
+2. Qué puesto le interesa (mozo, cocinero, encargado, bachero, ayudante de cocina, bartender)
+3. Experiencia previa en gastronomía (cuánto tiempo y en qué rol)
+4. Disponibilidad horaria — aclará que los turnos son rotativos (mañana, tarde y noche, incluyendo fines de semana)
+5. Zona donde vive
+6. Pretensión salarial aproximada
+7. Si tiene documentación en regla (DNI argentino o residencia)
+
+CRITERIOS DE DESCARTE — si se cumple alguno, terminá la conversación amablemente:
+- Si NO puede hacer horario rotativo → decile "Entendemos tu situación, pero nuestros puestos requieren disponibilidad rotativa. Por ahora no tenemos posiciones que se adapten a tu disponibilidad. ¡Muchas gracias por tu interés!" y no sigas.
+- Si tiene MENOS de 6 meses de experiencia en gastronomía → decile "Agradecemos tu interés, pero actualmente buscamos candidatos con al menos 6 meses de experiencia en el rubro. ¡Te deseamos éxito en tu búsqueda!" y no sigas.
+- Si vive FUERA de CABA o GBA (Gran Buenos Aires) → decile "Por el momento nuestras ubicaciones están en CABA y GBA, y necesitamos que el candidato pueda llegar sin complicaciones. ¡Gracias por comunicarte!" y no sigas.
+
+Si el candidato PASA todos los filtros, al final agradecele y decile que el equipo de RRHH se va a comunicar en las próximas 48hs hábiles. Cuando termines exitosamente, incluí al final de tu último mensaje este texto exacto: [POSTULACION_COMPLETA]
+
+Sé cálido, breve y directo. No hagas más de una pregunta por mensaje. No menciones que sos una IA a menos que te lo pregunten directamente.`;
 
   let conversationHistory = [];
   let isWaiting = false;
+  let candidatoData = {};
 
   // 3. Función para enviar mensajes
  async function sendMessage() {
@@ -815,13 +835,16 @@
 
     const data = await response.json();
 
-    // NUEVO: OpenRouter responde en data.choices[0].message.content
-    const reply = data.choices?.[0]?.message?.content 
+    let reply = data.choices?.[0]?.message?.content
                || 'Lo siento, no pude procesar la respuesta.';
 
+    // Detectar postulación completa y guardar en Sheet
+    if (reply.includes('[POSTULACION_COMPLETA]')) {
+      reply = reply.replace('[POSTULACION_COMPLETA]', '').trim();
+      guardarEnSheet();
+    }
+
     addMessage(reply, 'bot');
-    
-    // Guardamos la respuesta como 'assistant' (formato estándar)
     conversationHistory.push({ role: 'assistant', content: reply });
 
   } catch (e) {
@@ -852,7 +875,21 @@
     messages.scrollTop = messages.scrollHeight;
   }
 
-  // 5. Inicialización (Aquí estaba el error de llaves)
+  // 5. Guardar postulación en Google Sheet
+  function guardarEnSheet() {
+    if (SHEET_URL === 'TU_APPS_SCRIPT_URL_ACÁ') return;
+    const textos = conversationHistory.map(m => m.content).join('\n');
+    fetch(SHEET_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fecha: new Date().toLocaleString('es-AR'),
+        conversacion: textos
+      })
+    }).catch(() => {});
+  }
+
+  // 6. Inicialización
   function initChat() {
     // Escuchar el click del botón
     document.getElementById('chatSend').onclick = sendMessage;
