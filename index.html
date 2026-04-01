@@ -775,76 +775,67 @@
 </footer>
 
 <script>
+  // 1. URL de tu servidor en Vercel
   const PROXY_URL = 'https://proyectoandino.vercel.app/api/chat';
 
-  const SYSTEM_PROMPT = `Sos el asistente virtual de Proyecto Gastronómico Andino, un grupo gastronómico de Buenos Aires.
-Tu rol es hacer una preselección amable y profesional de candidatos para puestos gastronómicos (mozos, cocineros, encargados, bacheros, ayudantes de cocina, bartenders).
-
-Hacé las siguientes preguntas de forma conversacional, una por vez:
-1. Nombre completo
-2. Qué puesto le interesa
-3. Experiencia previa en gastronomía (años y roles)
-4. Disponibilidad horaria (turnos, días)
-5. Zona de residencia o cercanía en Buenos Aires
-6. Pretensión salarial aproximada
-7. Si tiene documentación en regla (DNI argentino o residencia)
-
-Al final, agradecé y decile que el equipo de RRHH se va a comunicar en las próximas 48hs hábiles.
-
-Sé cálido, breve y directo. No hagas más de una pregunta por mensaje. No menciones que sos una IA a menos que te lo pregunten directamente.`;
+  // 2. Instrucciones para la IA
+  const SYSTEM_PROMPT = `Sos el asistente virtual de Proyecto Gastronómico Andino.
+  Tu rol es hacer una preselección amable de candidatos.
+  Hacé estas preguntas una por una: Nombre, Puesto, Experiencia, Disponibilidad, Zona, Pretensión salarial y Documentación.
+  Sé breve y profesional. No menciones que sos una IA.`;
 
   let conversationHistory = [];
   let isWaiting = false;
 
+  // 3. Función para enviar mensajes
  async function sendMessage() {
-    const input = document.getElementById('chatInput');
-    const text = input.value.trim();
-    if (!text || isWaiting) return;
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || isWaiting) return;
 
-    addMessage(text, 'user');
-    input.value = '';
-    isWaiting = true;
-    document.getElementById('chatSend').disabled = true;
+  addMessage(text, 'user');
+  input.value = '';
+  isWaiting = true;
+  document.getElementById('chatSend').disabled = true;
 
-    // Agregamos el mensaje del usuario
-    conversationHistory.push({ role: 'user', parts: [{ text }] });
+  // NUEVO: Formato de historial para OpenRouter/OpenAI
+  conversationHistory.push({ role: 'user', content: text });
 
-    showTyping(true);
+  showTyping(true);
 
-    try {
-      const response = await fetch(PROXY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: conversationHistory,
-          system: SYSTEM_PROMPT
-        })
-      });
+  try {
+    const response = await fetch(PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: conversationHistory,
+        system: SYSTEM_PROMPT
+      })
+    });
 
-      if (!response.ok) throw new Error('Error en el servidor proxy');
+    const data = await response.json();
 
-      const data = await response.json();
-      
-      // Accedemos a la respuesta según el formato de Gemini
-      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text 
-                 || 'No recibí una respuesta clara. ¿Podrías intentar de nuevo?';
+    // NUEVO: OpenRouter responde en data.choices[0].message.content
+    const reply = data.choices?.[0]?.message?.content 
+               || 'Lo siento, no pude procesar la respuesta.';
 
-      addMessage(reply, 'bot');
-      conversationHistory.push({ role: 'model', parts: [{ text: reply }] });
+    addMessage(reply, 'bot');
+    
+    // Guardamos la respuesta como 'assistant' (formato estándar)
+    conversationHistory.push({ role: 'assistant', content: reply });
 
-    } catch (e) {
-      console.error(e);
-      addMessage('Lo siento, perdí la conexión con la montaña. Reintentá en un momento.', 'bot');
-      // Eliminamos el último mensaje del usuario del historial para no romper el orden si reintenta
-      conversationHistory.pop();
-    } finally {
-      showTyping(false);
-      isWaiting = false;
-      document.getElementById('chatSend').disabled = false;
-      input.focus();
-    }
+  } catch (e) {
+    console.error(e);
+    addMessage('Hubo un error al conectar con el servidor.', 'bot');
+    conversationHistory.pop();
+  } finally {
+    showTyping(false);
+    isWaiting = false;
+    document.getElementById('chatSend').disabled = false;
+    input.focus();
+  }
 }
-
+  // 4. Funciones de Interfaz
   function addMessage(text, type) {
     const messages = document.getElementById('chatMessages');
     const msg = document.createElement('div');
@@ -857,22 +848,27 @@ Sé cálido, breve y directo. No hagas más de una pregunta por mensaje. No menc
   function showTyping(show) {
     const typing = document.getElementById('typing');
     typing.style.display = show ? 'block' : 'none';
-    if (show) {
-      const messages = document.getElementById('chatMessages');
-      messages.scrollTop = messages.scrollHeight;
-    }
+    const messages = document.getElementById('chatMessages');
+    messages.scrollTop = messages.scrollHeight;
   }
 
+  // 5. Inicialización (Aquí estaba el error de llaves)
   function initChat() {
-    document.getElementById('chatInput').addEventListener('keydown', e => {
+    // Escuchar el click del botón
+    document.getElementById('chatSend').onclick = sendMessage;
+
+    // Escuchar la tecla Enter
+    document.getElementById('chatInput').onkeydown = (e) => {
       if (e.key === 'Enter') sendMessage();
-    });
-    document.getElementById('chatSend').addEventListener('click', sendMessage);
+    };
+
+    // Saludo inicial visual (NO se guarda en conversationHistory)
     setTimeout(() => {
-  // Mantené esto para que el bot salude visualmente
-  addMessage('¿Cómo te llamás?', 'bot');
+      addMessage('¡Hola! Soy el asistente virtual de Proyecto Gastronómico Andino 🏔️<br><br>¿Cómo te llamás?', 'bot');
+    }, 1000);
   }
 
+  // Ejecutar cuando la página esté lista
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initChat);
   } else {
