@@ -899,7 +899,7 @@ Sé cálido, breve y natural. Una pregunta por mensaje. No menciones que sos una
         fecha: new Date().toLocaleString('es-AR'),
         estado: estado,
         motivo: motivo,
-        conversacion: conversationHistory.map(m => (m.role === 'user' ? 'Candidato: ' : 'Asistente: ') + m.content).join('\n'),
+        conversacion: conversationHistory.map(m => (m.role === 'user' ? 'Candidato: ' : 'Asistente: ') + m.content).join(' || '),
         cv: cvBase64 || '',
         cvNombre: cvFileName || ''
       })
