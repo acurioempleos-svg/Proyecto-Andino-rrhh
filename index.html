@@ -775,7 +775,7 @@
 </footer>
 
 <script>
-  const GEMINI_API_KEY = 'TU_API_KEY_ACÁ';
+  const PROXY_URL = 'https://proyectoandino.vercel.app/api/chat';
 
   const SYSTEM_PROMPT = `Sos el asistente virtual de Proyecto Gastronómico Andino, un grupo gastronómico de Buenos Aires.
 Tu rol es hacer una preselección amable y profesional de candidatos para puestos gastronómicos (mozos, cocineros, encargados, bacheros, ayudantes de cocina, bartenders).
@@ -797,7 +797,6 @@ Sé cálido, breve y directo. No hagas más de una pregunta por mensaje. No menc
   let isWaiting = false;
 
   async function sendMessage() {
-    if (typeof isWaiting === 'undefined') return;
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
     if (!text || isWaiting) return;
@@ -857,18 +856,22 @@ Sé cálido, breve y directo. No hagas más de una pregunta por mensaje. No menc
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function initChat() {
     document.getElementById('chatInput').addEventListener('keydown', e => {
       if (e.key === 'Enter') sendMessage();
     });
-
     document.getElementById('chatSend').addEventListener('click', sendMessage);
-
     setTimeout(() => {
       addMessage('¿Cómo te llamás?', 'bot');
       conversationHistory.push({ role: 'model', parts: [{ text: '¿Cómo te llamás?' }] });
     }, 1000);
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initChat);
+  } else {
+    initChat();
+  }
 </script>
 
 </body>
