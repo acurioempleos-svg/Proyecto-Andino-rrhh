@@ -869,9 +869,8 @@ Sé cálido, breve y directo. No hagas más de una pregunta por mensaje. No menc
     });
     document.getElementById('chatSend').addEventListener('click', sendMessage);
     setTimeout(() => {
-      addMessage('¿Cómo te llamás?', 'bot');
-      conversationHistory.push({ role: 'model', parts: [{ text: '¿Cómo te llamás?' }] });
-    }, 1000);
+  // Mantené esto para que el bot salude visualmente
+  addMessage('¿Cómo te llamás?', 'bot');
   }
 
   if (document.readyState === 'loading') {
