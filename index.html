@@ -574,6 +574,21 @@
     letter-spacing: 1px;
   }
 
+  .chat-attach {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(139,94,60,0.1);
+    border-radius: 2px;
+    cursor: pointer;
+    color: var(--tierra);
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .chat-attach:hover { background: rgba(139,94,60,0.2); }
+
   /* ─── ANIMATIONS ─── */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(20px); }
@@ -734,7 +749,7 @@
         <h2 class="section-title">Contanos <em>quién</em><br>sos vos.</h2>
         <p>Nuestro asistente virtual te va a hacer algunas preguntas para conocerte mejor. Es rápido, sin formularios, sin esperas.</p>
         <div class="chat-features">
-          <div class="chat-feature">Sin CV requerido para empezar</div>
+          <div class="chat-feature">Podés adjuntar tu CV en PDF</div>
           <div class="chat-feature">Respuesta en menos de 48hs hábiles</div>
           <div class="chat-feature">Proceso claro y transparente</div>
           <div class="chat-feature">Disponible todos los días</div>
@@ -759,12 +774,19 @@
         </div>
         <div class="chat-input-area">
           <input type="text" class="chat-input" id="chatInput" placeholder="Escribí tu respuesta..." />
-          <button class="chat-send" id="chatSend" >
+          <label class="chat-attach" id="attachLabel" title="Adjuntar CV (PDF)">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M13.5 7.5l-6 6a4 4 0 01-5.66-5.66l6-6a2.5 2.5 0 013.54 3.54l-6 6a1 1 0 01-1.42-1.42l5.5-5.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <input type="file" id="cvFile" accept=".pdf" style="display:none" />
+          </label>
+          <button class="chat-send" id="chatSend">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M2 8l12-6-5 6 5 6-12-6z" fill="white"/>
             </svg>
           </button>
         </div>
+        <div id="cvStatus" style="font-size:12px;color:var(--tierra);padding:4px 16px 8px;display:none;"></div>
       </div>
     </div>
   </div>
@@ -775,95 +797,121 @@
 </footer>
 
 <script>
-  // 1. URL de tu servidor en Vercel
   const PROXY_URL = 'https://proyectoandino.vercel.app/api/chat';
-
-  // 2. URL del Google Apps Script para guardar en Sheet
   const SHEET_URL = 'TU_APPS_SCRIPT_URL_ACÁ';
 
-  // 3. Instrucciones para la IA
-  const SYSTEM_PROMPT = `Sos el asistente virtual de Proyecto Gastronómico Andino, un grupo gastronómico de Buenos Aires.
-Tu rol es hacer una preselección amable pero rigurosa de candidatos para puestos gastronómicos.
+  const SYSTEM_PROMPT = `Sos el asistente de selección de Proyecto Gastronómico Andino, un grupo gastronómico de Buenos Aires con varias marcas y locales.
+Tu trabajo es conocer al candidato de forma natural y amigable, como una charla, no como un formulario.
 
-Hacé las siguientes preguntas de forma conversacional, una por vez, en este orden:
-1. Nombre completo
-2. Qué puesto le interesa (mozo, cocinero, encargado, bachero, ayudante de cocina, bartender)
-3. Experiencia previa en gastronomía (cuánto tiempo y en qué rol)
-4. Disponibilidad horaria — aclará que los turnos son rotativos (mañana, tarde y noche, incluyendo fines de semana)
-5. Zona donde vive
-6. Pretensión salarial aproximada
-7. Si tiene documentación en regla (DNI argentino o residencia)
+Hacé estas preguntas de forma conversacional, una por vez, en este orden:
+1. Nombre y apellido
+2. A qué área le gustaría dedicarse (cocina, salón, operaciones, limpieza/soporte)
+3. Contame un poco de tu historia en el rubro — cuánto tiempo trabajaste en gastronomía y en qué tipo de lugares
+4. ¿Cómo manejás los horarios? Contamos con turnos mañana, tarde y noche, y a veces rotativos según el local
+5. ¿En qué zona de Buenos Aires vivís o desde dónde vendrías?
+6. ¿Tenés alguna expectativa de sueldo o rango en mente?
+7. ¿Tenés toda la documentación en orden (DNI o residencia)?
 
-CRITERIOS DE DESCARTE — si se cumple alguno, terminá la conversación amablemente:
-- Si NO puede hacer horario rotativo → decile "Entendemos tu situación, pero nuestros puestos requieren disponibilidad rotativa. Por ahora no tenemos posiciones que se adapten a tu disponibilidad. ¡Muchas gracias por tu interés!" y no sigas.
-- Si tiene MENOS de 6 meses de experiencia en gastronomía → decile "Agradecemos tu interés, pero actualmente buscamos candidatos con al menos 6 meses de experiencia en el rubro. ¡Te deseamos éxito en tu búsqueda!" y no sigas.
-- Si vive FUERA de CABA o GBA (Gran Buenos Aires) → decile "Por el momento nuestras ubicaciones están en CABA y GBA, y necesitamos que el candidato pueda llegar sin complicaciones. ¡Gracias por comunicarte!" y no sigas.
+EVALUACIÓN INTERNA — nunca lo menciones al candidato, solo al final de la conversación incluí el tag correcto:
+- Si NO puede adaptarse a turnos rotativos → tag: [NO_APTO:horario]
+- Si tiene MENOS de 6 meses de experiencia real en gastronomía → tag: [NO_APTO:experiencia]  
+- Si vive FUERA de CABA o GBA → tag: [NO_APTO:zona]
+- Si PASA todos los filtros → tag: [APTO]
 
-Si el candidato PASA todos los filtros, al final agradecele y decile que el equipo de RRHH se va a comunicar en las próximas 48hs hábiles. Cuando termines exitosamente, incluí al final de tu último mensaje este texto exacto: [POSTULACION_COMPLETA]
+Independientemente del resultado, terminá SIEMPRE con un mensaje cálido diciéndole que el equipo de RRHH va a estar en contacto. Nunca le digas que no fue seleccionado.
 
-Sé cálido, breve y directo. No hagas más de una pregunta por mensaje. No menciones que sos una IA a menos que te lo pregunten directamente.`;
+Al final de tu último mensaje incluí SOLO UNO de estos tags (oculto): [APTO] o [NO_APTO:motivo]
+
+Sé cálido, breve y natural. Una pregunta por mensaje. No menciones que sos una IA salvo que te lo pregunten directamente.`;
 
   let conversationHistory = [];
   let isWaiting = false;
-  let candidatoData = {};
+  let cvBase64 = null;
+  let cvFileName = null;
 
-  // 3. Función para enviar mensajes
- async function sendMessage() {
-  const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if (!text || isWaiting) return;
+  async function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text || isWaiting) return;
 
-  addMessage(text, 'user');
-  input.value = '';
-  isWaiting = true;
-  document.getElementById('chatSend').disabled = true;
+    addMessage(text, 'user');
+    input.value = '';
+    isWaiting = true;
+    document.getElementById('chatSend').disabled = true;
+    conversationHistory.push({ role: 'user', content: text });
+    showTyping(true);
 
-  // NUEVO: Formato de historial para OpenRouter/OpenAI
-  conversationHistory.push({ role: 'user', content: text });
+    try {
+      const response = await fetch(PROXY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: conversationHistory, system: SYSTEM_PROMPT })
+      });
 
-  showTyping(true);
+      const data = await response.json();
+      let reply = data.choices?.[0]?.message?.content || 'Lo siento, no pude procesar la respuesta.';
 
-  try {
-    const response = await fetch(PROXY_URL, {
+      // Detectar resultado y guardar en Sheet
+      let estado = null;
+      let motivo = '';
+      if (reply.includes('[APTO]')) {
+        reply = reply.replace('[APTO]', '').trim();
+        estado = 'Apto';
+      } else if (reply.match(/\[NO_APTO:(.*?)\]/)) {
+        const match = reply.match(/\[NO_APTO:(.*?)\]/);
+        motivo = match[1];
+        reply = reply.replace(match[0], '').trim();
+        estado = 'No apto';
+      }
+
+      if (estado) {
+        guardarEnSheet(estado, motivo);
+        // Pedir CV si es apto
+        if (estado === 'Apto') {
+          setTimeout(() => {
+            addMessage('Una última cosa: si tenés un CV en PDF podés adjuntarlo usando el clip 📎 — es opcional pero nos ayuda a conocerte mejor.', 'bot');
+            document.getElementById('attachLabel').style.display = 'flex';
+          }, 800);
+        }
+      }
+
+      addMessage(reply, 'bot');
+      conversationHistory.push({ role: 'assistant', content: reply });
+
+    } catch (e) {
+      console.error(e);
+      addMessage('Hubo un error al conectar con el servidor.', 'bot');
+      conversationHistory.pop();
+    } finally {
+      showTyping(false);
+      isWaiting = false;
+      document.getElementById('chatSend').disabled = false;
+      input.focus();
+    }
+  }
+
+  function guardarEnSheet(estado, motivo) {
+    if (SHEET_URL === 'TU_APPS_SCRIPT_URL_ACÁ') return;
+    fetch(SHEET_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: conversationHistory,
-        system: SYSTEM_PROMPT
+        fecha: new Date().toLocaleString('es-AR'),
+        estado: estado,
+        motivo: motivo,
+        conversacion: conversationHistory.map(m => (m.role === 'user' ? 'Candidato: ' : 'Asistente: ') + m.content).join('
+'),
+        cv: cvBase64 || '',
+        cvNombre: cvFileName || ''
       })
-    });
-
-    const data = await response.json();
-
-    let reply = data.choices?.[0]?.message?.content
-               || 'Lo siento, no pude procesar la respuesta.';
-
-    // Detectar postulación completa y guardar en Sheet
-    if (reply.includes('[POSTULACION_COMPLETA]')) {
-      reply = reply.replace('[POSTULACION_COMPLETA]', '').trim();
-      guardarEnSheet();
-    }
-
-    addMessage(reply, 'bot');
-    conversationHistory.push({ role: 'assistant', content: reply });
-
-  } catch (e) {
-    console.error(e);
-    addMessage('Hubo un error al conectar con el servidor.', 'bot');
-    conversationHistory.pop();
-  } finally {
-    showTyping(false);
-    isWaiting = false;
-    document.getElementById('chatSend').disabled = false;
-    input.focus();
+    }).catch(() => {});
   }
-}
-  // 4. Funciones de Interfaz
+
   function addMessage(text, type) {
     const messages = document.getElementById('chatMessages');
     const msg = document.createElement('div');
-    msg.className = `msg msg-${type}`;
-    msg.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g, '<br>')}</div>`;
+    msg.className = \`msg msg-\${type}\`;
+    msg.innerHTML = \`<div class="msg-bubble">\${text.replace(/\n/g, '<br>')}</div>\`;
     messages.appendChild(msg);
     messages.scrollTop = messages.scrollHeight;
   }
@@ -875,37 +923,40 @@ Sé cálido, breve y directo. No hagas más de una pregunta por mensaje. No menc
     messages.scrollTop = messages.scrollHeight;
   }
 
-  // 5. Guardar postulación en Google Sheet
-  function guardarEnSheet() {
-    if (SHEET_URL === 'TU_APPS_SCRIPT_URL_ACÁ') return;
-    const textos = conversationHistory.map(m => m.content).join('\n');
-    fetch(SHEET_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fecha: new Date().toLocaleString('es-AR'),
-        conversacion: textos
-      })
-    }).catch(() => {});
-  }
-
-  // 6. Inicialización
   function initChat() {
-    // Escuchar el click del botón
     document.getElementById('chatSend').onclick = sendMessage;
-
-    // Escuchar la tecla Enter
     document.getElementById('chatInput').onkeydown = (e) => {
       if (e.key === 'Enter') sendMessage();
     };
 
-    // Saludo inicial visual (NO se guarda en conversationHistory)
+    // Manejo del CV
+    document.getElementById('cvFile').onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        alert('El archivo no puede superar 5MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        cvBase64 = reader.result.split(',')[1];
+        cvFileName = file.name;
+        const status = document.getElementById('cvStatus');
+        status.textContent = '✓ CV adjunto: ' + file.name;
+        status.style.display = 'block';
+        addMessage('CV adjunto: ' + file.name + ' ✓', 'user');
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // Ocultar el botón de adjuntar hasta que sea necesario
+    document.getElementById('attachLabel').style.display = 'none';
+
     setTimeout(() => {
-      addMessage('¡Hola! Soy el asistente virtual de Proyecto Gastronómico Andino 🏔️<br><br>¿Cómo te llamás?', 'bot');
-    }, 1000);
+      addMessage('¡Hola! Soy el asistente de Proyecto Gastronómico Andino 🏔️<br><br>¿Cómo te llamás?', 'bot');
+    }, 800);
   }
 
-  // Ejecutar cuando la página esté lista
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initChat);
   } else {
