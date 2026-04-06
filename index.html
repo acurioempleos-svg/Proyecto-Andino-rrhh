@@ -870,7 +870,6 @@ Sé cálido, breve y natural. Una pregunta por mensaje. No menciones que sos una
         if (estado === 'Apto') {
           setTimeout(() => {
             addMessage('Una última cosa: si tenés un CV en PDF podés adjuntarlo usando el clip 📎 — es opcional pero nos ayuda a conocerte mejor.', 'bot');
-            document.getElementById('attachLabel').style.display = 'flex';
           }, 800);
         }
       }
@@ -891,7 +890,7 @@ Sé cálido, breve y natural. Una pregunta por mensaje. No menciones que sos una
   }
 
   function guardarEnSheet(estado, motivo) {
-    if (SHEET_URL === 'TU_APPS_SCRIPT_URL_ACÁ') return;
+    if (SHEET_URL === '1exlWSgrkwH7TsEzxo7RRBptNS_rFbKtzg4gy16AWqSU') return;
     fetch(SHEET_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -948,8 +947,8 @@ Sé cálido, breve y natural. Una pregunta por mensaje. No menciones que sos una
       reader.readAsDataURL(file);
     };
 
-    // Ocultar el botón de adjuntar hasta que sea necesario
-    document.getElementById('attachLabel').style.display = 'none';
+    // Mostrar el botón de adjuntar desde el inicio
+    document.getElementById('attachLabel').style.display = 'flex';
 
     setTimeout(() => {
       addMessage('¡Hola! Soy el asistente de Proyecto Gastronómico Andino 🏔️<br><br>¿Cómo te llamás?', 'bot');
