@@ -909,8 +909,8 @@ Sé cálido, breve y natural. Una pregunta por mensaje. No menciones que sos una
   function addMessage(text, type) {
     const messages = document.getElementById('chatMessages');
     const msg = document.createElement('div');
-    msg.className = \`msg msg-\${type}\`;
-    msg.innerHTML = \`<div class="msg-bubble">\${text.replace(/\n/g, '<br>')}</div>\`;
+    msg.className = `msg msg-${type}`;
+    msg.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g, '<br>')}</div>`;
     messages.appendChild(msg);
     messages.scrollTop = messages.scrollHeight;
   }
