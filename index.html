@@ -800,6 +800,7 @@
   const PROXY_URL = 'https://proyectoandino.vercel.app/api/chat';
   const SHEET_URL = 'https://proyectoandino.vercel.app/api/sheet';
 
+
   const SYSTEM_PROMPT = `Sos el asistente de selección de Proyecto Gastronómico Andino, un grupo gastronómico de Buenos Aires con varias marcas y locales.
 Tu trabajo es conocer al candidato de forma natural y amigable, como una charla, no como un formulario.
 
@@ -943,6 +944,20 @@ Sé cálido, breve y natural. Una pregunta por mensaje. No menciones que sos una
         status.textContent = '✓ CV adjunto: ' + file.name;
         status.style.display = 'block';
         addMessage('CV adjunto: ' + file.name + ' ✓', 'user');
+
+        // Mandar el CV al Sheet inmediatamente
+        fetch(SHEET_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fecha: new Date().toLocaleString('es-AR'),
+            estado: 'CV adjunto',
+            motivo: '',
+            conversacion: conversationHistory.map(m => (m.role === 'user' ? 'Candidato: ' : 'Asistente: ') + m.content).join(' || '),
+            cv: cvBase64,
+            cvNombre: cvFileName
+          })
+        }).catch(() => {});
       };
       reader.readAsDataURL(file);
     };
